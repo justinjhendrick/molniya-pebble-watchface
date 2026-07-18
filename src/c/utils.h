@@ -1,14 +1,6 @@
 #pragma once
 #include <pebble.h>
 
-static void fast_forward_time(struct tm* now) {
-  now->tm_min = now->tm_sec;           /* Minutes. [0-59] */
-  now->tm_hour = now->tm_sec % 24;     /* Hours.  [0-23] */
-  now->tm_mday = now->tm_sec % 31 + 1; /* Day. [1-31] */
-  now->tm_mon = now->tm_sec % 12;      /* Month. [0-11] */
-  now->tm_wday = now->tm_sec % 7;      /* Day of week. [0-6] */
-}
-
 static int min(int a, int b) {
   if (a < b) {
     return a;
@@ -41,4 +33,8 @@ static void format_hour(struct tm* now, char* buf, int len) {
     }
   }
   snprintf(buf, len, "%d", hour);
+}
+
+static void format_minute(struct tm* now, char* buf, int len) {
+  strftime(buf, len, "%M", now);
 }

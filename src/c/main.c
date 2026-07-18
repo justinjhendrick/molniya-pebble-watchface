@@ -11,11 +11,11 @@ static char s_buffer[BUFFER_LEN];
 static GFont s_font_lg = NULL;
 static GFont s_font_md = NULL;
 static const GColor s_color_background = GColorBlack;
-static const GColor s_color_dial = GColorWhite;
-static const GColor s_color_major_tick = GColorBlack;
-static const GColor s_color_minor_tick = GColorBlack;
-static const GColor s_color_hour = GColorBlack;
-static const GColor s_color_minute = GColorWhite;
+static const GColor s_color_15m_tick = GColorYellow;
+static const GColor s_color_5m_tick = GColorWhite;
+static const GColor s_color_1m_tick = GColorWhite;
+static const GColor s_color_hour = GColorYellow;
+static const GColor s_color_minute = GColorCyan;
 
 static void debug_bbox(GContext* ctx, GRect bbox) {
   if (DEBUG_BBOX) {
@@ -25,37 +25,56 @@ static void debug_bbox(GContext* ctx, GRect bbox) {
   }
 }
 
+static void debug_time(struct tm* now) {
+#if DEBUG_TIME
+  now->tm_min = now->tm_sec;           /* Minutes. [0-59] */
+  now->tm_hour = now->tm_sec % 24;     /* Hours.  [0-23] */
+  now->tm_mday = now->tm_sec % 31 + 1; /* Day. [1-31] */
+  now->tm_mon = now->tm_sec % 12;      /* Month. [0-11] */
+  now->tm_wday = now->tm_sec % 7;      /* Day of week. [0-6] */
+#endif
+#ifdef HOUR_OVERRIDE
+  now->tm_hour = HOUR_OVERRIDE;
+#endif
+#ifdef MINUTE_OVERRIDE
+  now->tm_min = MINUTE_OVERRIDE;
+#endif
+}
+
 static void draw_ticks(GContext* ctx, GPoint center, int dial_radius, struct tm* now) {
-  graphics_context_set_fill_color(ctx, s_color_dial);
-  graphics_fill_circle(ctx, center, dial_radius);
   for (int16_t tick_minute = 0; tick_minute < 60; tick_minute += 1) {
     int tick_deg = tick_minute * 360 / 60;
     GPoint minute_tick_outer = cartesian_from_polar(center, dial_radius, tick_deg);
     int tick_length = 1;
     if (tick_minute == now->tm_min) {
-      graphics_context_set_stroke_color(ctx, s_color_major_tick);
+      graphics_context_set_stroke_color(ctx, s_color_minute);
       graphics_context_set_stroke_width(ctx, 9);
-      tick_length = dial_radius * 7 / 20;
+      tick_length = dial_radius * 9 / 20;
     } else if (tick_minute % 15 == 0) {
-      graphics_context_set_stroke_color(ctx, s_color_major_tick);
+      graphics_context_set_stroke_color(ctx, s_color_15m_tick);
       graphics_context_set_stroke_width(ctx, 5);
-      tick_length = dial_radius * 2 / 10;
+      tick_length = dial_radius * 7 / 20;
     } else if (tick_minute % 5 == 0) {
-      graphics_context_set_stroke_color(ctx, s_color_minor_tick);
+      graphics_context_set_stroke_color(ctx, s_color_5m_tick);
       graphics_context_set_stroke_width(ctx, 3);
-      tick_length = dial_radius * 2 / 10;
+      tick_length = dial_radius * 6 / 20;
     } else {
-      graphics_context_set_stroke_color(ctx, s_color_minor_tick);
+      graphics_context_set_stroke_color(ctx, s_color_1m_tick);
       graphics_context_set_stroke_width(ctx, 1);
-      tick_length = dial_radius / 10;
+      tick_length = dial_radius * 3 / 20;
     }
     GPoint minute_tick_inner = cartesian_from_polar(center, dial_radius - tick_length, tick_deg);
     graphics_draw_line(ctx, minute_tick_inner, minute_tick_outer);
+    if (tick_minute == now->tm_min) {
+      graphics_context_set_stroke_color(ctx, s_color_background);
+      graphics_context_set_stroke_width(ctx, 1);
+      graphics_draw_line(ctx, minute_tick_inner, minute_tick_outer);
+    }
   }
 }
 
 static void draw_hour(GContext* ctx, GPoint center, int dial_radius, struct tm* now) {
-  GSize hour_bbox_size = GSize(100, 100);
+  GSize hour_bbox_size = GSize(100, 90);
   GFont hour_font = s_font_lg;
   GRect hour_bbox = rect_from_midpoint(center, hour_bbox_size);
   debug_bbox(ctx, hour_bbox);
@@ -73,7 +92,7 @@ static void draw_minute(GContext* ctx, GPoint center, int dial_radius, struct tm
   GRect minute_bbox = rect_from_midpoint(minute_bbox_midpoint, minute_bbox_size);
   debug_bbox(ctx, minute_bbox);
 
-  snprintf(s_buffer, BUFFER_LEN, "%d", now->tm_min);
+  format_minute(now, s_buffer, BUFFER_LEN);
   graphics_context_set_text_color(ctx, s_color_minute);
   graphics_draw_text(ctx, s_buffer, minute_font, minute_bbox, GTextOverflowModeFill, GTextAlignmentCenter, NULL);
 }
@@ -81,9 +100,7 @@ static void draw_minute(GContext* ctx, GPoint center, int dial_radius, struct tm
 static void update_layer(Layer* layer, GContext* ctx) {
   time_t temp = time(NULL);
   struct tm* now = localtime(&temp);
-  if (DEBUG_TIME) {
-    fast_forward_time(now);
-  }
+  debug_time(now);
   GRect bounds = layer_get_unobstructed_bounds(layer);
   graphics_context_set_fill_color(ctx, s_color_background);
   graphics_fill_rect(ctx, bounds, 0, GCornerNone);
@@ -117,8 +134,8 @@ static void tick_handler(struct tm* now, TimeUnits units_changed) {
 }
 
 static void init(void) {
-  s_font_lg = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_ANTONIO_90));
-  s_font_md = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_ANTONIO_55));
+  s_font_lg = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_ANTONIO_80));
+  s_font_md = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_ANTONIO_52));
 
   s_window = window_create();
   window_set_window_handlers(s_window, (WindowHandlers) {

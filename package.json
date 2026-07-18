@@ -1,7 +1,7 @@
 {
   "name": "Molniya",
   "author": "justinjhendrick",
-  "version": "1.3.0",
+  "version": "1.0.0",
   "keywords": [
     "pebble-watchface",
     "analog",
@@ -21,8 +21,8 @@
     "messageKeys": [],
     "resources": {
       "media": [
-        {"name": "ANTONIO_90", "file": "fonts/Antonio-Regular.ttf", "characterRegex": "[ 0-9]", "type": "font" },
-        {"name": "ANTONIO_55", "file": "fonts/Antonio-Regular.ttf", "characterRegex": "[ 0-9]", "type": "font" }
+        {"name": "ANTONIO_80", "file": "fonts/Antonio-Regular.ttf", "characterRegex": "[ 0-9]", "type": "font" },
+        {"name": "ANTONIO_52", "file": "fonts/Antonio-Regular.ttf", "characterRegex": "[ 0-9]", "type": "font" }
       ]
     }
   }
