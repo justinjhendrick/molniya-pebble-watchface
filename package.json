@@ -33,8 +33,17 @@
     ],
     "resources": {
       "media": [
-        {"name": "ANTONIO_80", "file": "fonts/Antonio-Regular.ttf", "characterRegex": "[ 0-9]", "type": "font" },
-        {"name": "ANTONIO_52", "file": "fonts/Antonio-Regular.ttf", "characterRegex": "[ 0-9]", "type": "font" }
+        {"name": "ANTONIO_40", "file": "fonts/Antonio-Regular.ttf", "characterRegex": "[0-9]", "type": "font" },
+        {"name": "ANTONIO_44", "file": "fonts/Antonio-Regular.ttf", "characterRegex": "[0-9]", "type": "font" },
+        {"name": "ANTONIO_48", "file": "fonts/Antonio-Regular.ttf", "characterRegex": "[0-9]", "type": "font" },
+        {"name": "ANTONIO_52", "file": "fonts/Antonio-Regular.ttf", "characterRegex": "[0-9]", "type": "font" },
+        {"name": "ANTONIO_56", "file": "fonts/Antonio-Regular.ttf", "characterRegex": "[0-9]", "type": "font" },
+        {"name": "ANTONIO_60", "file": "fonts/Antonio-Regular.ttf", "characterRegex": "[0-9]", "type": "font" },
+        {"name": "ANTONIO_64", "file": "fonts/Antonio-Regular.ttf", "characterRegex": "[0-9]", "type": "font" },
+        {"name": "ANTONIO_68", "file": "fonts/Antonio-Regular.ttf", "characterRegex": "[0-9]", "type": "font" },
+        {"name": "ANTONIO_72", "file": "fonts/Antonio-Regular.ttf", "characterRegex": "[0-9]", "type": "font" },
+        {"name": "ANTONIO_76", "file": "fonts/Antonio-Regular.ttf", "characterRegex": "[0-9]", "type": "font" },
+        {"name": "ANTONIO_80", "file": "fonts/Antonio-Regular.ttf", "characterRegex": "[0-9]", "type": "font" }
       ]
     }
   }

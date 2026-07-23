@@ -1,5 +1,6 @@
 #include <pebble.h>
 #include "utils.h"
+#include "fonts.h"
 
 #define BUFFER_LEN (10)
 #define DEBUG_TIME (false)
@@ -8,8 +9,6 @@
 static Window* s_window;
 static Layer* s_layer;
 static char s_buffer[BUFFER_LEN];
-static GFont s_font_lg = NULL;
-static GFont s_font_md = NULL;
 static GColor s_color_background = GColorBlack;
 static GColor s_color_15m_tick = GColorYellow;
 static GColor s_color_5m_tick = GColorWhite;
@@ -76,8 +75,11 @@ static void draw_ticks(GContext* ctx, GPoint center, int dial_radius, struct tm*
 }
 
 static void draw_hour(GContext* ctx, GPoint center, int dial_radius, struct tm* now) {
-  GSize hour_bbox_size = GSize(100, 90);
-  GFont hour_font = s_font_lg;
+  GSize hour_bbox_size = GSize(dial_radius, dial_radius * 9 / 10);
+  GFont hour_font = get_font(dial_radius * 8 / 10);
+  if (hour_font == NULL) {
+    return;
+  }
   GRect hour_bbox = rect_from_midpoint(center, hour_bbox_size);
   debug_bbox(ctx, hour_bbox);
 
@@ -88,8 +90,11 @@ static void draw_hour(GContext* ctx, GPoint center, int dial_radius, struct tm* 
 
 static void draw_minute(GContext* ctx, GPoint center, int dial_radius, struct tm* now) {
   int minute_deg = 360 * now->tm_min / 60;
-  GSize minute_bbox_size = GSize(100, 60);
-  GFont minute_font = s_font_md;
+  GSize minute_bbox_size = GSize(dial_radius, dial_radius * 6 / 10);
+  GFont minute_font = get_font(dial_radius * 52 / 100);
+  if (minute_font == NULL) {
+    return;
+  }
   GPoint minute_bbox_midpoint = cartesian_from_polar(center, dial_radius * 27 / 20, minute_deg);
   GRect minute_bbox = rect_from_midpoint(minute_bbox_midpoint, minute_bbox_size);
   debug_bbox(ctx, minute_bbox);
@@ -108,6 +113,7 @@ static void update_layer(Layer* layer, GContext* ctx) {
   graphics_fill_rect(ctx, bounds, 0, GCornerNone);
 
   int dial_radius = min(bounds.size.h, bounds.size.w) * 10 / 20;
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "dial_radius=%d", dial_radius);
   int minute_deg = 360 * now->tm_min / 60;
   int inverted_minute_deg = 180 + minute_deg;
   GPoint bounds_center = grect_center_point(&bounds);
@@ -176,9 +182,7 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 }
 
 static void init(void) {
-  s_font_lg = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_ANTONIO_80));
-  s_font_md = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_ANTONIO_52));
-
+  init_fonts();
   load_settings();
   app_message_register_inbox_received(inbox_received_handler);
   app_message_open(1024, 64);
@@ -194,8 +198,7 @@ static void init(void) {
 
 static void deinit(void) {
   if (s_window) window_destroy(s_window);
-  if (s_font_lg) fonts_unload_custom_font(s_font_lg);
-  if (s_font_md) fonts_unload_custom_font(s_font_md);
+  deinit_fonts();
 }
 
 int main(void) {
