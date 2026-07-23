@@ -1,16 +1,19 @@
 {
   "name": "Molniya",
   "author": "justinjhendrick",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "keywords": [
     "pebble-watchface",
+    "configurable",
     "analog",
     "digital",
     "orbit",
     "minimalist"
   ],
   "private": false,
-  "dependencies": {},
+  "dependencies": {
+    "@rebble/clay": "^1.0.8"
+  },
   "pebble": {
     "displayName": "Molniya",
     "uuid": "c9cdc552-246f-4ba1-bca1-c669bf9fdf93",
@@ -18,7 +21,16 @@
     "enableMultiJS": true,
     "targetPlatforms": [ "emery" ],
     "watchapp": { "watchface": true },
-    "messageKeys": [],
+    "messageKeys": [
+      "color_background",
+      "color_15m_tick",
+      "color_5m_tick",
+      "color_1m_tick",
+      "color_hour_digit",
+      "color_minute_digit",
+      "color_minute_hand_outer",
+      "color_minute_hand_inner"
+    ],
     "resources": {
       "media": [
         {"name": "ANTONIO_80", "file": "fonts/Antonio-Regular.ttf", "characterRegex": "[ 0-9]", "type": "font" },

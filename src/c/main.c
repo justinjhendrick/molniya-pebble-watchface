@@ -10,12 +10,14 @@ static Layer* s_layer;
 static char s_buffer[BUFFER_LEN];
 static GFont s_font_lg = NULL;
 static GFont s_font_md = NULL;
-static const GColor s_color_background = GColorBlack;
-static const GColor s_color_15m_tick = GColorYellow;
-static const GColor s_color_5m_tick = GColorWhite;
-static const GColor s_color_1m_tick = GColorWhite;
-static const GColor s_color_hour = GColorYellow;
-static const GColor s_color_minute = GColorCyan;
+static GColor s_color_background = GColorBlack;
+static GColor s_color_15m_tick = GColorYellow;
+static GColor s_color_5m_tick = GColorWhite;
+static GColor s_color_1m_tick = GColorWhite;
+static GColor s_color_hour_digit = GColorYellow;
+static GColor s_color_minute_digit = GColorCyan;
+static GColor s_color_minute_hand_outer = GColorCyan;
+static GColor s_color_minute_hand_inner = GColorBlack;
 
 static void debug_bbox(GContext* ctx, GRect bbox) {
   if (DEBUG_BBOX) {
@@ -47,7 +49,7 @@ static void draw_ticks(GContext* ctx, GPoint center, int dial_radius, struct tm*
     GPoint minute_tick_outer = cartesian_from_polar(center, dial_radius, tick_deg);
     int tick_length = 1;
     if (tick_minute == now->tm_min) {
-      graphics_context_set_stroke_color(ctx, s_color_minute);
+      graphics_context_set_stroke_color(ctx, s_color_minute_hand_outer);
       graphics_context_set_stroke_width(ctx, 9);
       tick_length = dial_radius * 9 / 20;
     } else if (tick_minute % 15 == 0) {
@@ -66,7 +68,7 @@ static void draw_ticks(GContext* ctx, GPoint center, int dial_radius, struct tm*
     GPoint minute_tick_inner = cartesian_from_polar(center, dial_radius - tick_length, tick_deg);
     graphics_draw_line(ctx, minute_tick_inner, minute_tick_outer);
     if (tick_minute == now->tm_min) {
-      graphics_context_set_stroke_color(ctx, s_color_background);
+      graphics_context_set_stroke_color(ctx, s_color_minute_hand_inner);
       graphics_context_set_stroke_width(ctx, 1);
       graphics_draw_line(ctx, minute_tick_inner, minute_tick_outer);
     }
@@ -80,7 +82,7 @@ static void draw_hour(GContext* ctx, GPoint center, int dial_radius, struct tm* 
   debug_bbox(ctx, hour_bbox);
 
   format_hour(now, s_buffer, BUFFER_LEN);
-  graphics_context_set_text_color(ctx, s_color_hour);
+  graphics_context_set_text_color(ctx, s_color_hour_digit);
   graphics_draw_text(ctx, s_buffer, hour_font, hour_bbox, GTextOverflowModeFill, GTextAlignmentCenter, NULL);
 }
 
@@ -93,7 +95,7 @@ static void draw_minute(GContext* ctx, GPoint center, int dial_radius, struct tm
   debug_bbox(ctx, minute_bbox);
 
   format_minute(now, s_buffer, BUFFER_LEN);
-  graphics_context_set_text_color(ctx, s_color_minute);
+  graphics_context_set_text_color(ctx, s_color_minute_digit);
   graphics_draw_text(ctx, s_buffer, minute_font, minute_bbox, GTextOverflowModeFill, GTextAlignmentCenter, NULL);
 }
 
@@ -119,7 +121,6 @@ static void update_layer(Layer* layer, GContext* ctx) {
 static void window_load(Window* window) {
   Layer* window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(window_layer);
-  window_set_background_color(s_window, s_color_background);
   s_layer = layer_create(bounds);
   layer_set_update_proc(s_layer, update_layer);
   layer_add_child(window_layer, s_layer);
@@ -133,9 +134,54 @@ static void tick_handler(struct tm* now, TimeUnits units_changed) {
   if (s_layer) layer_mark_dirty(s_layer);
 }
 
+static void load_settings() {
+  if (persist_exists(MESSAGE_KEY_color_background)) { s_color_background.argb = persist_read_int(MESSAGE_KEY_color_background); }
+  if (persist_exists(MESSAGE_KEY_color_15m_tick)) { s_color_15m_tick.argb = persist_read_int(MESSAGE_KEY_color_15m_tick); }
+  if (persist_exists(MESSAGE_KEY_color_5m_tick)) { s_color_5m_tick.argb = persist_read_int(MESSAGE_KEY_color_5m_tick); }
+  if (persist_exists(MESSAGE_KEY_color_1m_tick)) { s_color_1m_tick.argb = persist_read_int(MESSAGE_KEY_color_1m_tick); }
+  if (persist_exists(MESSAGE_KEY_color_hour_digit)) { s_color_hour_digit.argb = persist_read_int(MESSAGE_KEY_color_hour_digit); }
+  if (persist_exists(MESSAGE_KEY_color_minute_digit)) { s_color_minute_digit.argb = persist_read_int(MESSAGE_KEY_color_minute_digit); }
+  if (persist_exists(MESSAGE_KEY_color_minute_hand_outer)) { s_color_minute_hand_outer.argb = persist_read_int(MESSAGE_KEY_color_minute_hand_outer); }
+  if (persist_exists(MESSAGE_KEY_color_minute_hand_inner)) { s_color_minute_hand_inner.argb = persist_read_int(MESSAGE_KEY_color_minute_hand_inner); }
+}
+
+static void save_settings() {
+  const int version_key = 555;
+  // bump this if we need a backwards incompatible settings change.
+  const int version_value = 1;
+  persist_write_int(version_key, version_value);
+  // We depend on the order of the message keys to be stable
+  persist_write_int(MESSAGE_KEY_color_background, s_color_background.argb);
+  persist_write_int(MESSAGE_KEY_color_15m_tick, s_color_15m_tick.argb);
+  persist_write_int(MESSAGE_KEY_color_5m_tick, s_color_5m_tick.argb);
+  persist_write_int(MESSAGE_KEY_color_1m_tick, s_color_1m_tick.argb);
+  persist_write_int(MESSAGE_KEY_color_hour_digit, s_color_hour_digit.argb);
+  persist_write_int(MESSAGE_KEY_color_minute_digit, s_color_minute_digit.argb);
+  persist_write_int(MESSAGE_KEY_color_minute_hand_outer, s_color_minute_hand_outer.argb);
+  persist_write_int(MESSAGE_KEY_color_minute_hand_inner, s_color_minute_hand_inner.argb);
+}
+
+static void inbox_received_handler(DictionaryIterator *iter, void *context) {
+  Tuple *t;
+  if ((t = dict_find(iter, MESSAGE_KEY_color_background))) { s_color_background = GColorFromHEX(t->value->int32); }
+  if ((t = dict_find(iter, MESSAGE_KEY_color_15m_tick))) { s_color_15m_tick = GColorFromHEX(t->value->int32); }
+  if ((t = dict_find(iter, MESSAGE_KEY_color_5m_tick))) { s_color_5m_tick = GColorFromHEX(t->value->int32); }
+  if ((t = dict_find(iter, MESSAGE_KEY_color_1m_tick))) { s_color_1m_tick = GColorFromHEX(t->value->int32); }
+  if ((t = dict_find(iter, MESSAGE_KEY_color_hour_digit))) { s_color_hour_digit = GColorFromHEX(t->value->int32); }
+  if ((t = dict_find(iter, MESSAGE_KEY_color_minute_digit))) { s_color_minute_digit = GColorFromHEX(t->value->int32); }
+  if ((t = dict_find(iter, MESSAGE_KEY_color_minute_hand_outer))) { s_color_minute_hand_outer = GColorFromHEX(t->value->int32); }
+  if ((t = dict_find(iter, MESSAGE_KEY_color_minute_hand_inner))) { s_color_minute_hand_inner = GColorFromHEX(t->value->int32); }
+  save_settings();
+  if (s_layer) layer_mark_dirty(s_layer);
+}
+
 static void init(void) {
   s_font_lg = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_ANTONIO_80));
   s_font_md = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_ANTONIO_52));
+
+  load_settings();
+  app_message_register_inbox_received(inbox_received_handler);
+  app_message_open(1024, 64);
 
   s_window = window_create();
   window_set_window_handlers(s_window, (WindowHandlers) {

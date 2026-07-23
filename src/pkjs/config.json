@@ -1,0 +1,21 @@
+[
+  {
+    "type": "section",
+    "items": [
+      {"type": "heading", "defaultValue": "Colors"},
+      {"type": "color", "messageKey": "color_background", "defaultValue": "000000", "label": "Background Color"},
+      {"type": "color", "messageKey": "color_15m_tick", "defaultValue": "FFFF00", "label": "15 Minute Tick Color"},
+      {"type": "color", "messageKey": "color_5m_tick", "defaultValue": "FFFFFF", "label": "5 Minute Tick Color"},
+      {"type": "color", "messageKey": "color_1m_tick", "defaultValue": "FFFFFF", "label": "1 Minute Tick Color"},
+      {"type": "color", "messageKey": "color_hour_digit", "defaultValue": "FFFF00", "label": "Hour Digit Color"},
+      {"type": "color", "messageKey": "color_minute_digit", "defaultValue": "00FFFF", "label": "Minute Digit Color"},
+      {"type": "color", "messageKey": "color_minute_hand_outer", "defaultValue": "00FFFF", "label": "Minute Hand Outer Color"},
+      {"type": "color", "messageKey": "color_minute_hand_inner", "defaultValue": "000000", "label": "Minute Hand Inner Color"}
+    ]
+  },
+  {
+    "type": "submit",
+    "defaultValue": "Save Settings"
+  }
+]
+
