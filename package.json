@@ -1,7 +1,7 @@
 {
   "name": "Molniya",
   "author": "justinjhendrick",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "keywords": [
     "pebble-watchface",
     "configurable",
@@ -19,7 +19,11 @@
     "uuid": "c9cdc552-246f-4ba1-bca1-c669bf9fdf93",
     "sdkVersion": "3",
     "enableMultiJS": true,
-    "targetPlatforms": [ "emery" ],
+    "targetPlatforms": [
+      "flint",
+      "emery",
+      "gabbro"
+    ],
     "watchapp": { "watchface": true },
     "messageKeys": [
       "color_background",
@@ -33,17 +37,22 @@
     ],
     "resources": {
       "media": [
-        {"name": "ANTONIO_40", "file": "fonts/Antonio-Regular.ttf", "characterRegex": "[0-9]", "type": "font" },
-        {"name": "ANTONIO_44", "file": "fonts/Antonio-Regular.ttf", "characterRegex": "[0-9]", "type": "font" },
-        {"name": "ANTONIO_48", "file": "fonts/Antonio-Regular.ttf", "characterRegex": "[0-9]", "type": "font" },
-        {"name": "ANTONIO_52", "file": "fonts/Antonio-Regular.ttf", "characterRegex": "[0-9]", "type": "font" },
-        {"name": "ANTONIO_56", "file": "fonts/Antonio-Regular.ttf", "characterRegex": "[0-9]", "type": "font" },
-        {"name": "ANTONIO_60", "file": "fonts/Antonio-Regular.ttf", "characterRegex": "[0-9]", "type": "font" },
-        {"name": "ANTONIO_64", "file": "fonts/Antonio-Regular.ttf", "characterRegex": "[0-9]", "type": "font" },
-        {"name": "ANTONIO_68", "file": "fonts/Antonio-Regular.ttf", "characterRegex": "[0-9]", "type": "font" },
-        {"name": "ANTONIO_72", "file": "fonts/Antonio-Regular.ttf", "characterRegex": "[0-9]", "type": "font" },
-        {"name": "ANTONIO_76", "file": "fonts/Antonio-Regular.ttf", "characterRegex": "[0-9]", "type": "font" },
-        {"name": "ANTONIO_80", "file": "fonts/Antonio-Regular.ttf", "characterRegex": "[0-9]", "type": "font" }
+        {"name":  "ANTONIO_36", "file": "fonts/Antonio-Regular.ttf", "characterRegex": "[0-9]", "type": "font", "targetPlatforms": ["flint"] },
+        {"name":  "ANTONIO_40", "file": "fonts/Antonio-Regular.ttf", "characterRegex": "[0-9]", "type": "font" },
+        {"name":  "ANTONIO_44", "file": "fonts/Antonio-Regular.ttf", "characterRegex": "[0-9]", "type": "font" },
+        {"name":  "ANTONIO_48", "file": "fonts/Antonio-Regular.ttf", "characterRegex": "[0-9]", "type": "font" },
+        {"name":  "ANTONIO_52", "file": "fonts/Antonio-Regular.ttf", "characterRegex": "[0-9]", "type": "font" },
+        {"name":  "ANTONIO_56", "file": "fonts/Antonio-Regular.ttf", "characterRegex": "[0-9]", "type": "font" },
+        {"name":  "ANTONIO_60", "file": "fonts/Antonio-Regular.ttf", "characterRegex": "[0-9]", "type": "font", "targetPlatforms": ["emery", "gabbro"] },
+        {"name":  "ANTONIO_64", "file": "fonts/Antonio-Regular.ttf", "characterRegex": "[0-9]", "type": "font", "targetPlatforms": ["emery", "gabbro"] },
+        {"name":  "ANTONIO_68", "file": "fonts/Antonio-Regular.ttf", "characterRegex": "[0-9]", "type": "font", "targetPlatforms": ["emery", "gabbro"] },
+        {"name":  "ANTONIO_72", "file": "fonts/Antonio-Regular.ttf", "characterRegex": "[0-9]", "type": "font", "targetPlatforms": ["emery", "gabbro"] },
+        {"name":  "ANTONIO_76", "file": "fonts/Antonio-Regular.ttf", "characterRegex": "[0-9]", "type": "font", "targetPlatforms": ["emery", "gabbro"] },
+        {"name":  "ANTONIO_80", "file": "fonts/Antonio-Regular.ttf", "characterRegex": "[0-9]", "type": "font", "targetPlatforms": ["emery", "gabbro"] },
+        {"name":  "ANTONIO_84", "file": "fonts/Antonio-Regular.ttf", "characterRegex": "[0-9]", "type": "font", "targetPlatforms": ["gabbro"] },
+        {"name":  "ANTONIO_88", "file": "fonts/Antonio-Regular.ttf", "characterRegex": "[0-9]", "type": "font", "targetPlatforms": ["gabbro"] },
+        {"name":  "ANTONIO_92", "file": "fonts/Antonio-Regular.ttf", "characterRegex": "[0-9]", "type": "font", "targetPlatforms": ["gabbro"] },
+        {"name":  "ANTONIO_96", "file": "fonts/Antonio-Regular.ttf", "characterRegex": "[0-9]", "type": "font", "targetPlatforms": ["gabbro"] }
       ]
     }
   }

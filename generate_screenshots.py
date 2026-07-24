@@ -17,7 +17,7 @@ def reset() -> None:
 def run(platforms: list[str]) -> int:
     reset()
     screenshot_fnames = defaultdict(list)
-    hour = 8
+    hour = 12
     for minute in range(60):
         env = os.environ.copy()
         env["CFLAGS"] = f"-DHOUR_OVERRIDE={hour} -DMINUTE_OVERRIDE={minute}"
@@ -58,7 +58,7 @@ def run(platforms: list[str]) -> int:
 
 
 def main() -> int:
-    return run(["emery"])
+    return run(["flint", "emery", "gabbro"])
 
 
 if __name__ == "__main__":

@@ -6,6 +6,12 @@
 #define DEBUG_TIME (false)
 #define DEBUG_BBOX (false)
 
+#if PBL_DISPLAY_WIDTH >= 260
+  #define FULL_RADIUS_INSET (16)
+#else
+  #define FULL_RADIUS_INSET (0)
+#endif
+
 static Window* s_window;
 static Layer* s_layer;
 static char s_buffer[BUFFER_LEN];
@@ -43,32 +49,60 @@ static void debug_time(struct tm* now) {
 }
 
 static void draw_ticks(GContext* ctx, GPoint center, int dial_radius, struct tm* now) {
+  // Lower end of range is with timeline-quick-view
+  // Upper end of range is without
+  //   Flint  dial_radius is 58-72
+  //   Emery  dial_radius is 82-100
+  //   Gabbro dial_radius is 72-122
+
+  // All Flint sizes
+  // Small size Gabbro
+  int width_minute_hand = 7;
+  int width_15m_ticks = 5;
+  int width_5m_ticks = 3;
+  int width_1m_ticks = 1;
+  int width_minute_hand_inner = 1;
+  if (dial_radius >= 110) {
+    // Full size Gabbro only
+    width_minute_hand = 11;
+    width_15m_ticks = 7;
+    width_5m_ticks = 5;
+    width_1m_ticks = 3;
+    width_minute_hand_inner = 3;
+  } else if (dial_radius >= 80) {
+    // All Emery sizes
+    width_minute_hand = 9;
+    width_15m_ticks = 5;
+    width_5m_ticks = 3;
+    width_1m_ticks = 1;
+    width_minute_hand_inner = 1;
+  }
   for (int16_t tick_minute = 0; tick_minute < 60; tick_minute += 1) {
     int tick_deg = tick_minute * 360 / 60;
     GPoint minute_tick_outer = cartesian_from_polar(center, dial_radius, tick_deg);
     int tick_length = 1;
     if (tick_minute == now->tm_min) {
       graphics_context_set_stroke_color(ctx, s_color_minute_hand_outer);
-      graphics_context_set_stroke_width(ctx, 9);
+      graphics_context_set_stroke_width(ctx, width_minute_hand);
       tick_length = dial_radius * 9 / 20;
     } else if (tick_minute % 15 == 0) {
       graphics_context_set_stroke_color(ctx, s_color_15m_tick);
-      graphics_context_set_stroke_width(ctx, 5);
+      graphics_context_set_stroke_width(ctx, width_15m_ticks);
       tick_length = dial_radius * 7 / 20;
     } else if (tick_minute % 5 == 0) {
       graphics_context_set_stroke_color(ctx, s_color_5m_tick);
-      graphics_context_set_stroke_width(ctx, 3);
+      graphics_context_set_stroke_width(ctx, width_5m_ticks);
       tick_length = dial_radius * 6 / 20;
     } else {
       graphics_context_set_stroke_color(ctx, s_color_1m_tick);
-      graphics_context_set_stroke_width(ctx, 1);
+      graphics_context_set_stroke_width(ctx, width_1m_ticks);
       tick_length = dial_radius * 3 / 20;
     }
     GPoint minute_tick_inner = cartesian_from_polar(center, dial_radius - tick_length, tick_deg);
     graphics_draw_line(ctx, minute_tick_inner, minute_tick_outer);
     if (tick_minute == now->tm_min) {
       graphics_context_set_stroke_color(ctx, s_color_minute_hand_inner);
-      graphics_context_set_stroke_width(ctx, 1);
+      graphics_context_set_stroke_width(ctx, width_minute_hand_inner);
       graphics_draw_line(ctx, minute_tick_inner, minute_tick_outer);
     }
   }
@@ -77,9 +111,6 @@ static void draw_ticks(GContext* ctx, GPoint center, int dial_radius, struct tm*
 static void draw_hour(GContext* ctx, GPoint center, int dial_radius, struct tm* now) {
   GSize hour_bbox_size = GSize(dial_radius, dial_radius * 9 / 10);
   GFont hour_font = get_font(dial_radius * 8 / 10);
-  if (hour_font == NULL) {
-    return;
-  }
   GRect hour_bbox = rect_from_midpoint(center, hour_bbox_size);
   debug_bbox(ctx, hour_bbox);
 
@@ -92,9 +123,6 @@ static void draw_minute(GContext* ctx, GPoint center, int dial_radius, struct tm
   int minute_deg = 360 * now->tm_min / 60;
   GSize minute_bbox_size = GSize(dial_radius, dial_radius * 6 / 10);
   GFont minute_font = get_font(dial_radius * 52 / 100);
-  if (minute_font == NULL) {
-    return;
-  }
   GPoint minute_bbox_midpoint = cartesian_from_polar(center, dial_radius * 27 / 20, minute_deg);
   GRect minute_bbox = rect_from_midpoint(minute_bbox_midpoint, minute_bbox_size);
   debug_bbox(ctx, minute_bbox);
@@ -112,8 +140,8 @@ static void update_layer(Layer* layer, GContext* ctx) {
   graphics_context_set_fill_color(ctx, s_color_background);
   graphics_fill_rect(ctx, bounds, 0, GCornerNone);
 
-  int dial_radius = min(bounds.size.h, bounds.size.w) * 10 / 20;
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "dial_radius=%d", dial_radius);
+  int full_radius = min(bounds.size.h, bounds.size.w) - FULL_RADIUS_INSET;
+  int dial_radius = full_radius / 2;
   int minute_deg = 360 * now->tm_min / 60;
   int inverted_minute_deg = 180 + minute_deg;
   GPoint bounds_center = grect_center_point(&bounds);

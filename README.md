@@ -1,8 +1,16 @@
 # Molniya Pebble Watch Face
 
+## Flint
+
+![screenshot](screenshots_flint_12xx.gif)
+
 ## Emery
 
-![screenshot](screenshots_emery_08xx.gif)
+![screenshot](screenshots_emery_12xx.gif)
+
+## Gabbro
+
+![screenshot](screenshots_gabbro_12xx.gif)
 
 ## License
 
