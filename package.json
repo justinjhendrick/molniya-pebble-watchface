@@ -33,7 +33,10 @@
       "color_hour_digit",
       "color_minute_digit",
       "color_minute_hand_outer",
-      "color_minute_hand_inner"
+      "color_minute_hand_inner",
+      "color_date_background",
+      "color_date_text",
+      "enable_date"
     ],
     "resources": {
       "media": [
