@@ -25,7 +25,7 @@ static GColor s_color_minute_digit = GColorCyan;
 static GColor s_color_minute_hand_outer = GColorCyan;
 static GColor s_color_minute_hand_inner = GColorBlack;
 static GColor s_color_date_text = GColorWhite;
-static bool s_enable_date = true;
+static bool s_enable_date = false;
 
 static void debug_bbox(GContext* ctx, GRect bbox) {
   if (DEBUG_BBOX) {
