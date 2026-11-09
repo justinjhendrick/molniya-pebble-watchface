@@ -24,8 +24,7 @@ static GColor s_color_hour_digit = GColorYellow;
 static GColor s_color_minute_digit = GColorCyan;
 static GColor s_color_minute_hand_outer = GColorCyan;
 static GColor s_color_minute_hand_inner = GColorBlack;
-static GColor s_color_date_background = GColorWhite;
-static GColor s_color_date_text = GColorBlack;
+static GColor s_color_date_text = GColorWhite;
 static bool s_enable_date = false;
 
 static void debug_bbox(GContext* ctx, GRect bbox) {
@@ -123,29 +122,41 @@ static void draw_hour(GContext* ctx, GPoint center, int dial_radius, struct tm* 
   graphics_draw_text(ctx, s_buffer, hour_font, hour_bbox, GTextOverflowModeFill, GTextAlignmentCenter, NULL);
 }
 
-static void draw_minute(GContext* ctx, GPoint center, int dial_radius, struct tm* now) {
+static void draw_minute(GContext* ctx, GPoint center, int dial_radius, struct tm* now, bool show_date) {
   int minute_deg = 360 * now->tm_min / 60;
+  const int minute_radius = dial_radius * 27 / 20;
   GSize minute_bbox_size = GSize(dial_radius, dial_radius * 6 / 10);
   GFont minute_font = get_font(dial_radius * 52 / 100);
-  GPoint minute_bbox_midpoint = cartesian_from_polar(center, dial_radius * 27 / 20, minute_deg);
+  GPoint minute_bbox_midpoint = cartesian_from_polar(center, minute_radius, minute_deg);
   GRect minute_bbox = rect_from_midpoint(minute_bbox_midpoint, minute_bbox_size);
   debug_bbox(ctx, minute_bbox);
 
   format_minute(now, s_buffer, BUFFER_LEN);
   graphics_context_set_text_color(ctx, s_color_minute_digit);
   graphics_draw_text(ctx, s_buffer, minute_font, minute_bbox, GTextOverflowModeFill, GTextAlignmentCenter, NULL);
-}
 
-static void draw_date(GContext* ctx, GRect bbox, struct tm* now) {
-  debug_bbox(ctx, bbox);
-  GFont font = fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD);
-  strftime(s_buffer, BUFFER_LEN, "%a %d %b", now);
-  graphics_context_set_fill_color(ctx, GColorWhite);
-  graphics_fill_rect(ctx, bbox, 0, GCornerNone);
-  graphics_context_set_text_color(ctx, GColorBlack);
-  int shift_up = 4;
-  bbox.origin.y -= shift_up;
-  graphics_draw_text(ctx, s_buffer, font, bbox, GTextOverflowModeFill, GTextAlignmentCenter, NULL);
+  if (show_date) {
+    int dayte_radius = minute_radius - 5;
+    graphics_context_set_text_color(ctx, s_color_date_text);
+    GFont font = fonts_get_system_font(FONT_KEY_GOTHIC_24);
+    int day_deg = 360 * (now->tm_min - 4) / 60;
+    int date_deg = 360 * (now->tm_min + 4) / 60;
+    int shift_up = 3;
+
+    GSize size = GSize(minute_bbox_size.w / 2, minute_bbox_size.h / 2);
+    GRect day_bbox = rect_from_midpoint(cartesian_from_polar(center, dayte_radius, day_deg), size);
+    GRect date_bbox = rect_from_midpoint(cartesian_from_polar(center, dayte_radius, date_deg), size);
+    debug_bbox(ctx, day_bbox);
+    debug_bbox(ctx, date_bbox);
+
+    strftime(s_buffer, BUFFER_LEN, "%a", now);
+    day_bbox.origin.y -= shift_up;
+    graphics_draw_text(ctx, s_buffer, font, day_bbox, GTextOverflowModeFill, GTextAlignmentCenter, NULL);
+
+    strftime(s_buffer, BUFFER_LEN, "%b %d", now);
+    date_bbox.origin.y -= shift_up;
+    graphics_draw_text(ctx, s_buffer, font, date_bbox, GTextOverflowModeFill, GTextAlignmentCenter, NULL);
+  }
 }
 
 static void update_layer(Layer* layer, GContext* ctx) {
@@ -156,14 +167,6 @@ static void update_layer(Layer* layer, GContext* ctx) {
   GRect bounds = layer_get_unobstructed_bounds(layer);
   bool timeline_quick_view = bounds.size.h < obstructed_bounds.size.h;
   bool show_date = !timeline_quick_view && s_enable_date;
-#if PBL_IS_ROUND
-  int date_height = 40;
-#else
-  int date_height = 30;
-#endif
-  if (show_date) {
-    bounds.size.h -= date_height;
-  }
   graphics_context_set_fill_color(ctx, s_color_background);
   graphics_fill_rect(ctx, bounds, 0, GCornerNone);
 
@@ -176,11 +179,7 @@ static void update_layer(Layer* layer, GContext* ctx) {
 
   draw_ticks(ctx, dial_center, dial_radius, now);
   draw_hour(ctx, dial_center, dial_radius, now);
-  draw_minute(ctx, dial_center, dial_radius, now);
-  if (show_date) {
-    GRect date_bbox = GRect(bounds.origin.x, bounds.origin.y + bounds.size.h, bounds.size.w, date_height);
-    draw_date(ctx, date_bbox, now);
-  }
+  draw_minute(ctx, dial_center, dial_radius, now, show_date);
 }
 
 static void window_load(Window* window) {
@@ -208,7 +207,6 @@ static void load_settings() {
   if (persist_exists(MESSAGE_KEY_color_minute_digit)) { s_color_minute_digit.argb = persist_read_int(MESSAGE_KEY_color_minute_digit); }
   if (persist_exists(MESSAGE_KEY_color_minute_hand_outer)) { s_color_minute_hand_outer.argb = persist_read_int(MESSAGE_KEY_color_minute_hand_outer); }
   if (persist_exists(MESSAGE_KEY_color_minute_hand_inner)) { s_color_minute_hand_inner.argb = persist_read_int(MESSAGE_KEY_color_minute_hand_inner); }
-  if (persist_exists(MESSAGE_KEY_color_date_background)) { s_color_date_background.argb = persist_read_int(MESSAGE_KEY_color_date_background); }
   if (persist_exists(MESSAGE_KEY_color_date_text)) { s_color_date_text.argb = persist_read_int(MESSAGE_KEY_color_date_text); }
   if (persist_exists(MESSAGE_KEY_enable_date)) { s_enable_date = persist_read_bool(MESSAGE_KEY_enable_date); }
 }
@@ -227,7 +225,6 @@ static void save_settings() {
   persist_write_int(MESSAGE_KEY_color_minute_digit, s_color_minute_digit.argb);
   persist_write_int(MESSAGE_KEY_color_minute_hand_outer, s_color_minute_hand_outer.argb);
   persist_write_int(MESSAGE_KEY_color_minute_hand_inner, s_color_minute_hand_inner.argb);
-  persist_write_int(MESSAGE_KEY_color_date_background, s_color_date_background.argb);
   persist_write_int(MESSAGE_KEY_color_date_text, s_color_date_text.argb);
   persist_write_bool(MESSAGE_KEY_enable_date, s_enable_date);
 }
@@ -242,7 +239,6 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
   if ((t = dict_find(iter, MESSAGE_KEY_color_minute_digit))) { s_color_minute_digit = GColorFromHEX(t->value->int32); }
   if ((t = dict_find(iter, MESSAGE_KEY_color_minute_hand_outer))) { s_color_minute_hand_outer = GColorFromHEX(t->value->int32); }
   if ((t = dict_find(iter, MESSAGE_KEY_color_minute_hand_inner))) { s_color_minute_hand_inner = GColorFromHEX(t->value->int32); }
-  if ((t = dict_find(iter, MESSAGE_KEY_color_date_background))) { s_color_date_background = GColorFromHEX(t->value->int32); }
   if ((t = dict_find(iter, MESSAGE_KEY_color_date_text))) { s_color_date_text = GColorFromHEX(t->value->int32); }
   if ((t = dict_find(iter, MESSAGE_KEY_enable_date))) { s_enable_date = t->value->int32; }
   save_settings();

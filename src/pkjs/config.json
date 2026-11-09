@@ -11,8 +11,7 @@
       {"type": "color", "messageKey": "color_minute_digit", "defaultValue": "00FFFF", "label": "Minute Digit Color"},
       {"type": "color", "messageKey": "color_minute_hand_outer", "defaultValue": "00FFFF", "label": "Minute Hand Outer Color"},
       {"type": "color", "messageKey": "color_minute_hand_inner", "defaultValue": "000000", "label": "Minute Hand Inner Color"},
-      {"type": "color", "messageKey": "color_date_background", "defaultValue": "FFFFFF", "label": "Date Background Color"},
-      {"type": "color", "messageKey": "color_date_text", "defaultValue": "000000", "label": "Date Text Color"}
+      {"type": "color", "messageKey": "color_date_text", "defaultValue": "FFFFFF", "label": "Date Text Color"}
     ]
   },
   {
