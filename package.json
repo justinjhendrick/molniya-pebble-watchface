@@ -37,6 +37,7 @@
       "color_date_text",
       "enable_date"
     ],
+    "usesPermissions": [],
     "resources": {
       "media": [
         {"name":  "ANTONIO_36", "file": "fonts/Antonio-Regular.ttf", "characterRegex": "[0-9]", "type": "font", "targetPlatforms": ["flint"] },

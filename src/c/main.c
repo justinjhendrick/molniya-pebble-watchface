@@ -25,7 +25,7 @@ static GColor s_color_minute_digit = GColorCyan;
 static GColor s_color_minute_hand_outer = GColorCyan;
 static GColor s_color_minute_hand_inner = GColorBlack;
 static GColor s_color_date_text = GColorWhite;
-static bool s_enable_date = false;
+static bool s_enable_date = true;
 
 static void debug_bbox(GContext* ctx, GRect bbox) {
   if (DEBUG_BBOX) {
@@ -136,26 +136,27 @@ static void draw_minute(GContext* ctx, GPoint center, int dial_radius, struct tm
   graphics_draw_text(ctx, s_buffer, minute_font, minute_bbox, GTextOverflowModeFill, GTextAlignmentCenter, NULL);
 
   if (show_date) {
-    int dayte_radius = minute_radius - 5;
+    int dayte_radius = minute_radius - 6;
     graphics_context_set_text_color(ctx, s_color_date_text);
-    GFont font = fonts_get_system_font(FONT_KEY_GOTHIC_24);
-    int day_deg = 360 * (now->tm_min - 4) / 60;
-    int date_deg = 360 * (now->tm_min + 4) / 60;
-    int shift_up = 3;
+    GFont font = fonts_get_system_font(FONT_KEY_GOTHIC_28);
+    int day_deg = 360 * (now->tm_min - 5) / 60;
+    int date_deg = 360 * (now->tm_min + 5) / 60;
+    int shift_up = 0;
 
-    GSize size = GSize(minute_bbox_size.w / 2, minute_bbox_size.h / 2);
-    GRect day_bbox = rect_from_midpoint(cartesian_from_polar(center, dayte_radius, day_deg), size);
-    GRect date_bbox = rect_from_midpoint(cartesian_from_polar(center, dayte_radius, date_deg), size);
+    int w = 80;
+    int h = 32;
+    GRect day_bbox = rect_from_midpoint(cartesian_from_polar(center, dayte_radius, day_deg), GSize(w, h));
+    GRect date_bbox = rect_from_midpoint(cartesian_from_polar(center, dayte_radius, date_deg), GSize(w, 2 * h));
     debug_bbox(ctx, day_bbox);
     debug_bbox(ctx, date_bbox);
 
     strftime(s_buffer, BUFFER_LEN, "%a", now);
     day_bbox.origin.y -= shift_up;
-    graphics_draw_text(ctx, s_buffer, font, day_bbox, GTextOverflowModeFill, GTextAlignmentCenter, NULL);
+    graphics_draw_text(ctx, s_buffer, font, day_bbox, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
 
-    strftime(s_buffer, BUFFER_LEN, "%b %d", now);
+    strftime(s_buffer, BUFFER_LEN, "%b\n%d", now);
     date_bbox.origin.y -= shift_up;
-    graphics_draw_text(ctx, s_buffer, font, date_bbox, GTextOverflowModeFill, GTextAlignmentCenter, NULL);
+    graphics_draw_text(ctx, s_buffer, font, date_bbox, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
   }
 }
 
