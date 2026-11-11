@@ -247,6 +247,7 @@ static void inbox_received_handler(DictionaryIterator *iter, void *context) {
 }
 
 static void init(void) {
+  char* sys_locale = setlocale(LC_ALL, ""); // changes strftime behavior
   init_fonts();
   load_settings();
   app_message_register_inbox_received(inbox_received_handler);
