@@ -4,3 +4,4 @@ build/
 .lock-waf_linux_build
 node_modules
 *.png
+!screenshot_emery_with_date.png

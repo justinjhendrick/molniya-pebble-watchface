@@ -8,6 +8,8 @@
 
 ![screenshot](screenshots_emery_12xx.gif)
 
+![screenshot](screenshot_emery_with_date.png)
+
 ## Gabbro
 
 ![screenshot](screenshots_gabbro_12xx.gif)
